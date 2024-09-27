@@ -4,8 +4,11 @@ import Home from './pages/LoginSignUp/Home';
 import LoginPage from './pages/LoginSignUp/LoginPage';
 import Signup from './pages/LoginSignUp/Signup';
 
+
 function App() {
+
   return (
+
     <BrowserRouter>
       <Routes>
 
