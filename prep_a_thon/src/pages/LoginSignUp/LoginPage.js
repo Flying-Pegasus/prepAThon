@@ -1,7 +1,25 @@
-import React from 'react'
+import React, { useState } from 'react'
+import {getAuth, signInWithEmailAndPassword} from "firebase/auth"
+import { app } from "./firebase"
 import { Link } from "react-router-dom";
+import logo from "./logo.png"
+import Home from './Home';
+
+const auth = getAuth(app);
 
 function LoginPage() {
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const signinUser = () => {
+    signInWithEmailAndPassword(auth, email, password)
+    .then((value)=> <Home/>)
+    .catch((error)=> alert(error));
+    setEmail("");
+    setPassword("");
+  };
+
   return (
     <>
       <body>
@@ -11,19 +29,21 @@ function LoginPage() {
 
             <div className="content">
 
+              <img className="eyeLogo" src={logo} alt="Logo" />
+
               <h2>Sign In</h2>
 
               <div className="form">
 
                 <div className="inputBox">
 
-                  <input type="text" required /> <i>Username</i>
+                  <input onChange={(e) => setEmail(e.target.value)} value={email} type="email" required /> <i>Email</i>
 
                 </div>
 
                 <div className="inputBox">
 
-                  <input type="password" required /> <i>Password</i>
+                  <input onChange={(e) => setPassword(e.target.value)} value={password} type="password" required />  <i>Password</i>
 
                 </div>
 
@@ -33,7 +53,7 @@ function LoginPage() {
 
                 <div className="inputBox">
 
-                  <input type="submit" value="Login" />
+                  <input onClick={signinUser} type="submit" value="Login" />
 
                 </div>
 
