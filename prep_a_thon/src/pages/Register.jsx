@@ -1,32 +1,50 @@
-import React, { useState } from 'react'
-import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider , signInWithPopup} from "firebase/auth"
-import { Link } from "react-router-dom";
-import { app } from "./firebase"
+import React, { useState, useEffect } from "react";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { useNavigate,Link } from "react-router-dom";
+import { useFirebase } from "../context/Firebase";
+import {setDoc,doc} from "firebase/firestore"
+import {app, db} from "./firebase"
 import logo from "./logo.png"
 
 const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider();
 
-function Signup() {
 
-  const [user, setUser] = useState("");
+const RegisterPage = () => {
+  const firebase = useFirebase();
+  const navigate = useNavigate();
+
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const createUser = () => {
-    createUserWithEmailAndPassword(auth, email, password).then((value) => alert("success")).catch((error) => alert(error));
-    setUser("");
-    setEmail("");
-    setPassword("");
-  };
+  useEffect(() => {
+    if (firebase.isLoggedIn) {
+      // navigate to home
+      navigate("/profile");
+    }
+  }, [firebase, navigate]);
 
-  const signupwithGoogle = () => {
-    signInWithPopup(auth, googleProvider).then((value) => alert("success"));
-    setUser("");
-    setEmail("");
-    setPassword("");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try{
+      await  createUserWithEmailAndPassword(auth,email,password);
+      const user = auth.currentUser;
+      console.log(user);
+      if (user) {
+        await setDoc(doc(db,"Users", user.uid),{
+          email : user.email,
+          username: username,
+        });
+      }
+      console.log("User registered Successfully!");
+      alert(`${username} registered Successfully!`);
+      setUsername("");setEmail("");setPassword("");
+    } catch (error) {
+      console.log(error.message);
+      alert(error.message);
+      setUsername("");setEmail("");setPassword("");
+    }
   };
-
 
 
   return (
@@ -46,7 +64,7 @@ function Signup() {
 
                 <div className="inputBox">
 
-                  <input onChange={(e) => setUser(e.target.value)} value={user} type="text" required /> <i>Username</i>
+                  <input onChange={(e) => setUsername(e.target.value)} value={username} type="text" required /> <i>Username</i>
 
                 </div>
 
@@ -62,19 +80,12 @@ function Signup() {
 
                 </div>
 
-                <button onClick={signupwithGoogle} type="button" class="login-with-google-btn" >
-                  Sign in with Google
-                </button>
-                <button type="button" class="login-with-github-btn" >
-                  Sign in with Github
-                </button>
 
-
-                <div className="links"> <Link to="/">Login</Link></div>
+                <div className="links"> <Link to="/login">Login</Link></div>
 
                 <div className="inputBox">
 
-                  <input onClick={createUser} type="submit" value="Create Account" />
+                  <input onClick={handleSubmit} type="submit" value="Create Account" />
 
                 </div>
 
@@ -90,4 +101,4 @@ function Signup() {
   )
 }
 
-export default Signup
+export default RegisterPage;
