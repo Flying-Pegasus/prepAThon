@@ -1,24 +1,104 @@
-import React, { useState } from 'react'
-import {getAuth, signInWithEmailAndPassword} from "firebase/auth"
-import { app } from "./firebase"
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { getAuth,sendPasswordResetEmail, GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { app, db } from "./firebase"
+import { setDoc, doc } from "firebase/firestore"
+import { useNavigate, Link } from "react-router-dom";
+import { useFirebase } from "../context/Firebase";
 import logo from "./logo.png"
-import Home from './Home';
 
 const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+const githubProvider = new GithubAuthProvider();
 
-function LoginPage() {
+const LoginPage = () => {
+  const firebase = useFirebase();
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const signinUser = () => {
-    signInWithEmailAndPassword(auth, email, password)
-    .then((value)=> <Home/>)
-    .catch((error)=> alert(error));
-    setEmail("");
-    setPassword("");
+  useEffect(() => {
+    if (firebase.isLoggedIn) {
+      // navigate to home
+      navigate("/profile");
+    }
+  }, [firebase, navigate]);
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log("User LoggedIn Successfully!");
+      alert(`LoggedIn Successfully!`);
+      setEmail(""); setPassword("");
+    } catch (error) {
+      console.log(error.message);
+      alert(error.message);
+      setEmail(""); setPassword("");
+    }
   };
+
+  const signupwithGoogle = () => {
+    signInWithPopup(auth, googleProvider).then(async (result) => {
+      console.log(result);
+      const user = result.user;
+      // const credential = GoogleAuthProvider.credentialFromResult(result);
+      // const token = credential.accessToken;
+      if (result.user) {
+        await setDoc(doc(db, "Users", user.uid), {
+          email: user.email,
+          firstName: user.displayName,
+        });
+        alert("User logged in Successfully");
+
+      }
+    });
+    // .catch((error) => {
+      //       const errorCode = error.code;
+      //       const errorMessage = error.message;
+      //       const email = error.customData.email;
+      //       const credential = GoogleAuthProvider.credentialFromError(error);
+      //     });
+  }
+
+
+  const signupwithGithub = () => {
+    signInWithPopup(auth, githubProvider)
+      .then(async (result) => {
+        // This gives you a GitHub Access Token. You can use it to access the GitHub API.
+        // const credential = GithubAuthProvider.credentialFromResult(result);
+        // const token = credential.accessToken;
+        const user = result.user;
+        if (result.user) {
+          await setDoc(doc(db, "Users", user.uid), {
+            email: user.email,
+            firstName: user.displayName,
+          });
+          alert("User logged in Successfully");
+        }
+
+      }).catch((error) => {
+        console.log(error);
+        // const errorCode = error.code;
+        // const errorMessage = error.message;
+        // const email = error.customData.email;
+        // const credential = GithubAuthProvider.credentialFromError(error);
+      });
+  }
+
+  const forgotPassword = () =>{
+    sendPasswordResetEmail(auth,email)
+    .then(()=>{
+      alert("A password reset link has been sent to your email if it is registered")
+    })
+    .catch((error)=>{
+      console.log(error.message)
+      alert(error.message);
+    })
+  }
+
+
 
   return (
     <>
@@ -47,17 +127,24 @@ function LoginPage() {
 
                 </div>
 
-                <div className="links"> <Link to="/new">Forgot Password</Link> <Link to="/signup">Sign Up</Link>
+                <div className="links"> <div className="forpass" onClick={forgotPassword}>Forgot Password</div> <Link to="/register">Sign Up</Link>
 
                 </div>
 
+
                 <div className="inputBox">
 
-                  <input onClick={signinUser} type="submit" value="Login" />
+                  <input onClick={handleSubmit} type="submit" value="Login" />
 
                 </div>
 
               </div>
+              <button onClick={signupwithGoogle} type="button" class="login-with-google-btn" >
+                Signin with Google
+              </button>
+              <button onClick={signupwithGithub} type="button" class="login-with-github-btn" >
+                Signin with GitHub
+              </button>
 
             </div>
 
@@ -69,4 +156,4 @@ function LoginPage() {
   )
 }
 
-export default LoginPage
+export default LoginPage;
