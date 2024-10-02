@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import React, { useState } from "react";
+import { getAuth,signOut, createUserWithEmailAndPassword,sendEmailVerification } from "firebase/auth";
 import { useNavigate,Link } from "react-router-dom";
-import { useFirebase } from "../context/Firebase";
+// import { useFirebase } from "../context/Firebase";
 import {setDoc,doc} from "firebase/firestore"
 import {app, db} from "./firebase"
 import logo from "./logo.png"
@@ -10,19 +10,12 @@ const auth = getAuth(app);
 
 
 const RegisterPage = () => {
-  const firebase = useFirebase();
   const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    if (firebase.isLoggedIn) {
-      // navigate to home
-      navigate("/profile");
-    }
-  }, [firebase, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,8 +29,12 @@ const RegisterPage = () => {
           username: username,
         });
       }
-      console.log("User registered Successfully!");
-      alert(`${username} registered Successfully!`);
+      await signOut(auth);
+      await sendEmailVerification(user);
+      console.log("success");
+      navigate("/")
+      alert(`${username} please verify your email`);
+
       setUsername("");setEmail("");setPassword("");
     } catch (error) {
       console.log(error.message);

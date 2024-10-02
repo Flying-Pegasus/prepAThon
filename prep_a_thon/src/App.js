@@ -1,23 +1,32 @@
 import './App.css';
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route,Navigate } from "react-router-dom";
 import RegisterPage from './pages/Register';
 import LoginPage from './pages/Login';
 import Newpage from './pages/Newpage';
-import ForgotPass from './pages/ForgotPass';
+import Profile from './components/Userprofile';
+import {app} from "./pages/firebase"
+import { useEffect, useState } from 'react';
+import { getAuth } from 'firebase/auth';
 
-
+const auth = getAuth(app);
 
 function App() {
+  const [user, setUser] = useState();
+  useEffect(() => {
+    auth.onAuthStateChanged((user) => {
+      setUser(user);
+    });
+  });
 
   return (
 
     <div>
       <Routes>
-        <Route path="/" element={<LoginPage/>} />
-        <Route path="/profile" element={<Newpage/>} />
+        <Route path="/" element={user ? <Navigate to="/profile" /> : <LoginPage />} />
+        <Route path="/profile" element={<Profile/>} />
+        <Route path="/new" element={<Newpage/>} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/forgotpass" element={<ForgotPass />} />
+        <Route path="/login" element={user ? <Navigate to="/profile" /> : <LoginPage />} />
       </Routes>
     </div>
 
