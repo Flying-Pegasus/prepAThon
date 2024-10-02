@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { getAuth,sendPasswordResetEmail, GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import React, { useState } from "react";
+import { getAuth,sendEmailVerification,sendPasswordResetEmail, GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { app, db } from "./firebase"
 import { setDoc, doc } from "firebase/firestore"
 import { useNavigate, Link } from "react-router-dom";
-import { useFirebase } from "../context/Firebase";
+// import { useFirebase } from "../context/Firebase";
 import logo from "./logo.png"
 
 const auth = getAuth(app);
@@ -11,27 +11,32 @@ const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
 const LoginPage = () => {
-  const firebase = useFirebase();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    if (firebase.isLoggedIn) {
-      // navigate to home
-      navigate("/profile");
-    }
-  }, [firebase, navigate]);
+
 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      console.log("User LoggedIn Successfully!");
-      alert(`LoggedIn Successfully!`);
+      const user = await signInWithEmailAndPassword(auth, email, password);
+      console.log(user)
       setEmail(""); setPassword("");
+      // if (user.user.emailVerified) {
+      //   console.log("User LoggedIn Successfully!");
+      //   alert(`LoggedIn Successfully!`);
+      //   alert("Verified");
+      //   navigate("/profile");
+      // }
+      // else{
+      //   alert("Please verify email");
+      //   await sendEmailVerification(auth);
+      //   await signOut();
+
+      // }
     } catch (error) {
       console.log(error.message);
       alert(error.message);
@@ -48,7 +53,7 @@ const LoginPage = () => {
       if (result.user) {
         await setDoc(doc(db, "Users", user.uid), {
           email: user.email,
-          firstName: user.displayName,
+          username: user.displayName,
         });
         alert("User logged in Successfully");
 
