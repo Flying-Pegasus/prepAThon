@@ -1,13 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import './style.css';
 import logo from "../pages/logo.png"
-import profileIcon from "../pages/profile-icon.png"
+
+import profileicon from "../pages/profile-icon.jpg"
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { app, db } from "../pages/firebase"
 import { doc, getDoc } from "firebase/firestore";
-import { useNavigate } from 'react-router-dom';
-import Newpage from '../pages/Newpage';
 
 
 const auth = getAuth(app);
@@ -20,24 +18,21 @@ const StockaR = () => {
   const [infoVisible, setInfoVisible] = useState(false);
   const [progress, setProgress] = useState(0);
   const [searchHistory, setSearchHistory] = useState([]);
+  const [sidebarVisible, setSidebarVisible] = useState(false); // State for sidebar
   const [userDetails, setUserDetails] = useState(null);
 
-  const toggleDropdown = () => {
-    setDropdownVisible(!dropdownVisible);
-    console.log("clicked")
-    console.log(dropdownVisible)
-  }
+
+  const toggleDropdown = () => setDropdownVisible((prev) => !prev);
+  const toggleSidebar = () => setSidebarVisible(!sidebarVisible); // Toggle for sidebar
 
 
   const fetchUserData = async () => {
     try {
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        console.log("Hi");
         const docRef = doc(db, "Users", user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setUserDetails(docSnap.data());
-          console.log(docSnap.data());
         } else {
           console.log("User is not logged in");
         }
@@ -45,7 +40,7 @@ const StockaR = () => {
     } catch (error) {
       console.log(error.message);
     }
-  }
+  };
 
   async function handleLogout() {
     try {
@@ -57,9 +52,20 @@ const StockaR = () => {
     }
   }
 
-  // Close dropdown if clicked outside
+  // Close dropdown and sidebar if clicked outside
   useEffect(() => {
-    fetchUserData();
+    const closeDropdownAndSidebar = (e) => {
+      fetchUserData();
+      if (!e.target.closest('#profileicon') && dropdownVisible) {
+        setDropdownVisible(false);
+      }
+      if (!e.target.closest('#hamburger') && !e.target.closest('#sidebar')) {
+        setSidebarVisible(false);
+      }
+    };
+
+    window.addEventListener('click', closeDropdownAndSidebar);
+    return () => window.removeEventListener('click', closeDropdownAndSidebar);
   }, []);
 
   // Handle search button click
@@ -68,11 +74,12 @@ const StockaR = () => {
       alert('Please enter a company name or code.');
       return;
     }
-
+  
     setLoading(true);
-    setSearchHistory([...searchHistory, companyName]); // Update search history
+    // Update search history: add new search at the top
+    setSearchHistory([companyName, ...searchHistory]); 
     startLoadingBar();
-
+  
     // Simulate company data search after 2 seconds
     setTimeout(() => {
       stopLoadingBar();
@@ -104,8 +111,8 @@ const StockaR = () => {
         <h1 id="home-title">StockaR</h1>
         <div className="profile">
           <img
-            id="profile-icon"
-            src={profileIcon}
+            id="profileicon"
+            src={profileicon}
             alt="Profile"
             onClick={toggleDropdown}
           />
@@ -113,13 +120,13 @@ const StockaR = () => {
             <div >
               <button>Your Profile</button>
               <button className="btn btn-primary" onClick={handleLogout}>
-              Logout
-            </button>
+                Logout
+              </button>
             </div>
 
           )}
         </div>
-        <div id="hamburger">&#9776;</div>
+        <div id="hamburger" onClick={toggleSidebar}>&#9776;</div> {/* Toggle sidebar on click */}
       </nav>
 
       <main className='formain'>
@@ -157,40 +164,15 @@ const StockaR = () => {
               <p>Stock price<br />Market share<br />Revenue<br />expense year by year</p>
             </div>
             <div className="info-box">
-              <h3>Data</h3>
-              <p>Stock price<br />Market share<br />Revenue<br />expense year by year</p>
-            </div>
-            <div className="info-box">
               <h3>Comment</h3>
-              <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Repellat atque pariatur, libero aspernatur tenetur itaque amet. Repellat delectus, voluptate tenetur perferendis ex nihil explicabo deserunt atque blanditiis velit ad similique.</p>
-            </div>
-            <div className="info-box">
-              <h3>prediction</h3>
+              <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
             </div>
           </div>
         )}
-
-        <div id="metrics-section" style={{ display: 'none' }}>
-          <h2>Company Metrics</h2>
-          <div className="metric-box">
-            <p>Companies in the same country: <span id="same-country-count"></span></p>
-          </div>
-          <div className="metric-box">
-            <p>Greater diversity companies: <span id="diversity-count"></span></p>
-          </div>
-          <div className="metric-box">
-            <p>Stock Price Change: <span id="stock-price-change"></span></p>
-          </div>
-          <div className="metric-box">
-            <p>Market Share Change: <span id="market-share-change"></span></p>
-          </div>
-          <div className="metric-box">
-            <p>Predicted Stock Price: <span id="predicted-stock-price"></span></p>
-          </div>
-        </div>
       </main>
 
-      <aside id="sidebar">
+      {/* Sidebar for search history */}
+      <aside id="sidebar" className={sidebarVisible ? 'open' : ''}>
         <h2>Search History</h2>
         <ul id="history-list">
           {searchHistory.map((historyItem, index) => (
@@ -198,7 +180,6 @@ const StockaR = () => {
           ))}
         </ul>
       </aside>
-
     </div>
   );
 };
