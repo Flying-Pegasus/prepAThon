@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { getAuth,sendEmailVerification,sendPasswordResetEmail, GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import React, {  useState } from "react";
+import { getAuth, sendPasswordResetEmail, GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { app, db } from "./firebase"
 import { setDoc, doc } from "firebase/firestore"
 import { useNavigate, Link } from "react-router-dom";
@@ -15,32 +15,36 @@ const LoginPage = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [error, setError] = useState('');
 
 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
-      const user = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
       console.log(user)
       setEmail(""); setPassword("");
-      // if (user.user.emailVerified) {
-      //   console.log("User LoggedIn Successfully!");
-      //   alert(`LoggedIn Successfully!`);
-      //   alert("Verified");
-      //   navigate("/profile");
-      // }
-      // else{
-      //   alert("Please verify email");
-      //   await sendEmailVerification(auth);
-      //   await signOut();
+      if (user.emailVerified) {
+        console.log("User LoggedIn Successfully!");
+        alert(`LoggedIn Successfully!`);
+        navigate("/profile");
+      }
+      else {
+        alert("Please verify email");
+        console.log("Pleeese");
+        setError('Email not verified. Please verify your email.');
+        await signOut(auth);
+        navigate("/login");
 
-      // }
+      }
     } catch (error) {
       console.log(error.message);
       alert(error.message);
       setEmail(""); setPassword("");
+      setError(`Error: ${error.message}`);
     }
   };
 
@@ -48,8 +52,6 @@ const LoginPage = () => {
     signInWithPopup(auth, googleProvider).then(async (result) => {
       console.log(result);
       const user = result.user;
-      // const credential = GoogleAuthProvider.credentialFromResult(result);
-      // const token = credential.accessToken;
       if (result.user) {
         await setDoc(doc(db, "Users", user.uid), {
           email: user.email,
@@ -58,14 +60,13 @@ const LoginPage = () => {
         alert("User logged in Successfully");
 
       }
-    });
-    // .catch((error) => {
-      //       const errorCode = error.code;
-      //       const errorMessage = error.message;
-      //       const email = error.customData.email;
-      //       const credential = GoogleAuthProvider.credentialFromError(error);
-      //     });
-  }
+    }).catch((error) => {
+        console.log(error.message);
+        console.log(error.customData.email);
+        const credential = GoogleAuthProvider.credentialFromError(error);
+        console.log(credential);
+      });
+  };
 
 
   const signupwithGithub = () => {
@@ -84,23 +85,20 @@ const LoginPage = () => {
         }
 
       }).catch((error) => {
-        console.log(error);
-        // const errorCode = error.code;
-        // const errorMessage = error.message;
-        // const email = error.customData.email;
-        // const credential = GithubAuthProvider.credentialFromError(error);
+        console.log(error.message);
+        console.log(error.customData.email);
       });
   }
 
-  const forgotPassword = () =>{
-    sendPasswordResetEmail(auth,email)
-    .then(()=>{
-      alert("A password reset link has been sent to your email if it is registered")
-    })
-    .catch((error)=>{
-      console.log(error.message)
-      alert(error.message);
-    })
+  const forgotPassword = () => {
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        alert("A password reset link has been sent to your email if it is registered")
+      })
+      .catch((error) => {
+        console.log(error.message)
+        alert(error.message);
+      })
   }
 
 
@@ -156,6 +154,7 @@ const LoginPage = () => {
           </div>
 
         </section>
+        {error && <p id="try">{error}</p>}
       </body>
     </>
   )

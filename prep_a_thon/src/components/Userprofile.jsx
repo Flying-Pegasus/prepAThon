@@ -1,33 +1,41 @@
 import React, { useEffect, useState } from "react";
 import { app, db } from "../pages/firebase"
 import { doc, getDoc } from "firebase/firestore";
-import {getAuth,signOut,onAuthStateChanged} from "firebase/auth"
+import Newpage from "../pages/Newpage";
+import { useNavigate } from 'react-router-dom';
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+
 
 const auth = getAuth(app);
-
 function Profile() {
+  const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState(null);
   const fetchUserData = async () => {
-    auth.onAuthStateChanged(async (user) => {
-      console.log(user);
+    try {
+      const unscubscribe = onAuthStateChanged(auth, async (user) => {
+        console.log("Hi");
+        const docRef = doc(db, "Users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setUserDetails(docSnap.data());
+          console.log(docSnap.data());
+        } else {
+          console.log("User is not logged in");
+        }
+      });
+    }catch(error){
+      console.log(error.message);
+    }
 
-      const docRef = doc(db, "Users", user.uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setUserDetails(docSnap.data());
-        console.log(docSnap.data());
-      } else {
-        console.log("User is not logged in");
-      }
-    });
-  };
+  }
+
   useEffect(() => {
     fetchUserData();
   }, []);
 
   async function handleLogout() {
     try {
-      await auth.signOut();
+      await signOut(auth);
       window.location.href = "/login";
       console.log("User logged out successfully!");
     } catch (error) {
@@ -40,7 +48,7 @@ function Profile() {
         <>
           <div style={{ display: "flex", justifyContent: "center" }}>
           </div>
-          <h3  id="try">Welcome {userDetails.username} 🙏🙏</h3>
+          <h3 id="try">Welcome {userDetails.username} 🙏🙏</h3>
           <div>
             <p id="try">Email: {userDetails.email}</p>
 
@@ -50,7 +58,7 @@ function Profile() {
           </button>
         </>
       ) : (
-        <p>Loading...</p>
+        <p><Newpage /></p>
       )}
     </div>
   );

@@ -20,8 +20,8 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try{
-      await  createUserWithEmailAndPassword(auth,email,password);
-      const user = auth.currentUser;
+      const userCred = await createUserWithEmailAndPassword(auth,email,password);
+      const user = userCred.user;
       console.log(user);
       if (user) {
         await setDoc(doc(db,"Users", user.uid),{
