@@ -7,7 +7,7 @@ import Profile from './components/Userprofile';
 import {app} from "./pages/firebase"
 import { useEffect, useState } from 'react';
 import { getAuth } from 'firebase/auth';
-import StockaR from './search/react';
+import StockaR from './components/react';
 
 const auth = getAuth(app);
 

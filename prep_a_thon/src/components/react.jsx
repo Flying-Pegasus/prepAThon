@@ -1,6 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import './style.css';
+import logo from "../pages/logo.png"
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+import { app, db } from "../pages/firebase"
+import { doc, getDoc } from "firebase/firestore";
+import Newpage from '../pages/Newpage';
+
+
+const auth = getAuth(app);
 
 const StockaR = () => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -9,13 +17,42 @@ const StockaR = () => {
   const [infoVisible, setInfoVisible] = useState(false);
   const [progress, setProgress] = useState(0);
   const [searchHistory, setSearchHistory] = useState([]);
+  const [userDetails, setUserDetails] = useState(null);
 
-  // Toggle dropdown visibility on profile icon click
   const toggleDropdown = () => setDropdownVisible(!dropdownVisible);
+
+  const fetchUserData = async () => {
+    try {
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        console.log("Hi");
+        const docRef = doc(db, "Users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setUserDetails(docSnap.data());
+          console.log(docSnap.data());
+        } else {
+          console.log("User is not logged in");
+        }
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  async function handleLogout() {
+    try {
+      await signOut(auth);
+      window.location.href = "/login";
+      console.log("User logged out successfully!");
+    } catch (error) {
+      console.error("Error logging out:", error.message);
+    }
+  }
 
   // Close dropdown if clicked outside
   useEffect(() => {
     const closeDropdown = (e) => {
+      fetchUserData();
       if (!e.target.closest('#profile-icon') && !e.target.closest('#dropdown-content')) {
         setDropdownVisible(false);
       }
@@ -60,9 +97,9 @@ const StockaR = () => {
   };
 
   return (
-    <div>
-      <header>
-        <img id="logo" src="assets/logo.png" alt="Logo" onClick={() => (window.location.href = '/')} />
+    <div className='fordiv'>
+      <nav>
+        <img id="logo" src={logo} alt="Logo" onClick={() => (window.location.href = '/')} />
         <h1 id="home-title">StockaR</h1>
         <div className="profile">
           <img
@@ -79,7 +116,7 @@ const StockaR = () => {
           )}
         </div>
         <div id="hamburger">&#9776;</div>
-      </header>
+      </nav>
 
       <main>
         <div id="search-container">
@@ -104,28 +141,27 @@ const StockaR = () => {
         {infoVisible && (
           <div id="info-boxes" style={{ display: 'flex' }}>
             <div className="info-box">
-              <h3>Title 1</h3>
-              <p>Line 1<br />Line 2<br />Line 3</p>
+              <h3 id='boldTitle'>42</h3>
+              <p>companies are in the same country</p>
             </div>
             <div className="info-box">
-              <h3>Title 2</h3>
-              <p>Line 1<br />Line 2<br />Line 3</p>
+              <h3 id='boldTitle'>24</h3>
+              <p>companies with greater diversity are in the same country</p>
             </div>
             <div className="info-box">
-              <h3>Title 3</h3>
-              <p>Line 1<br />Line 2<br />Line 3</p>
+              <h3>Data</h3>
+              <p>Stock price<br />Market share<br />Revenue<br />expense year by year</p>
             </div>
             <div className="info-box">
-              <h3>Title 4</h3>
-              <p>Line 1<br />Line 2<br />Line 3</p>
+              <h3>Data</h3>
+              <p>Stock price<br />Market share<br />Revenue<br />expense year by year</p>
             </div>
             <div className="info-box">
-              <h3>Title 5</h3>
-              <p>Line 1<br />Line 2<br />Line 3</p>
+              <h3>Comment</h3>
+              <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Repellat atque pariatur, libero aspernatur tenetur itaque amet. Repellat delectus, voluptate tenetur perferendis ex nihil explicabo deserunt atque blanditiis velit ad similique.</p>
             </div>
             <div className="info-box">
-              <h3>Title 6</h3>
-              <p>Line 1<br />Line 2<br />Line 3</p>
+              <h3>prediction</h3>
             </div>
           </div>
         )}
@@ -158,6 +194,25 @@ const StockaR = () => {
           ))}
         </ul>
       </aside>
+      <div className="details">
+        {userDetails ? (
+          <>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+            </div>
+            <h3 id="try">Welcome {userDetails.username} 🙏🙏</h3>
+            <div>
+              <p id="try">Email: {userDetails.email}</p>
+
+            </div>
+            <button className="btn btn-primary" onClick={handleLogout}>
+              Logout
+            </button>
+          </>
+        ) : (
+          <p><Newpage/></p>
+        )}
+      </div>
+
     </div>
   );
 };
