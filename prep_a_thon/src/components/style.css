@@ -26,13 +26,15 @@ nav {
     z-index: 1000;   /* Ensure it stays above other elements */
 }
 
-body {
-    margin-top: 60px; /* Add margin to prevent content from being hidden behind the fixed header */
-}
 
 nav img#logo {
     width: 50px;
     cursor: pointer;
+    margin-left: 20px;
+}
+
+.formain{
+    margin-top: 100px;
 }
 
 h1 {
@@ -47,6 +49,7 @@ h1 {
     align-items: center; /* Centers items vertically within the profile container */
     height: 50px;       /* Fixed height for the profile container */
 }
+
 
 #profileicon {
     width: 40px;        /* Width of the profile icon */
@@ -161,7 +164,7 @@ h1 {
 }
 
 .metric-box {
-    background-color: white;
+    background-color: rgb(255, 255, 255);
     border: 1px solid #00ff00;
     border-radius: 10px;
     margin: 20px;

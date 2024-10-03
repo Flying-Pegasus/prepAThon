@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import './style.css';
 import logo from "../pages/logo.png"
+
 import profileicon from "../pages/profile-icon.jpg"
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { app, db } from "../pages/firebase"
 import { doc, getDoc } from "firebase/firestore";
 
+
 const auth = getAuth(app);
 
 const StockaR = () => {
+  const navigate = useNavigate();
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,8 +21,10 @@ const StockaR = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false); // State for sidebar
   const [userDetails, setUserDetails] = useState(null);
 
+
   const toggleDropdown = () => setDropdownVisible((prev) => !prev);
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible); // Toggle for sidebar
+
 
   const fetchUserData = async () => {
     try {
@@ -112,18 +117,19 @@ const StockaR = () => {
             onClick={toggleDropdown}
           />
           {dropdownVisible && (
-            <div id="dropdown-content" className="dropdown-content">
+            <div >
               <button>Your Profile</button>
               <button className="btn btn-primary" onClick={handleLogout}>
                 Logout
               </button>
             </div>
+
           )}
         </div>
         <div id="hamburger" onClick={toggleSidebar}>&#9776;</div> {/* Toggle sidebar on click */}
       </nav>
 
-      <main>
+      <main className='formain'>
         <div id="search-container">
           <input
             type="text"
