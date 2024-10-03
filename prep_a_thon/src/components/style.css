@@ -19,11 +19,22 @@ nav {
     background-color: #000;
     color: #00ff00;
     padding: 10px;
+    position: fixed;
+    top: 0%;
+    right: 0%;
+    width: 100vw;
+    z-index: 1;
+
 }
 
 nav img#logo {
     width: 50px;
     cursor: pointer;
+    margin-left: 20px;
+}
+
+.formain{
+    margin-top: 100px;
 }
 
 h1 {
@@ -43,6 +54,7 @@ h1 {
     cursor: pointer;
     border: 2px solid #00ff00;
     padding: 2px;
+    margin: 5px;
 }
 
 .dropdown-content {
@@ -147,7 +159,7 @@ h1 {
 }
 
 .metric-box {
-    background-color: white;
+    background-color: rgb(255, 255, 255);
     border: 1px solid #00ff00;
     border-radius: 10px;
     margin: 20px;

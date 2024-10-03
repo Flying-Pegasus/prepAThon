@@ -2,15 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import './style.css';
 import logo from "../pages/logo.png"
+import profileIcon from "../pages/profile-icon.png"
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { app, db } from "../pages/firebase"
 import { doc, getDoc } from "firebase/firestore";
+import { useNavigate } from 'react-router-dom';
 import Newpage from '../pages/Newpage';
 
 
 const auth = getAuth(app);
 
 const StockaR = () => {
+  const navigate = useNavigate();
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,7 +22,12 @@ const StockaR = () => {
   const [searchHistory, setSearchHistory] = useState([]);
   const [userDetails, setUserDetails] = useState(null);
 
-  const toggleDropdown = () => setDropdownVisible(!dropdownVisible);
+  const toggleDropdown = () => {
+    setDropdownVisible(!dropdownVisible);
+    console.log("clicked")
+    console.log(dropdownVisible)
+  }
+
 
   const fetchUserData = async () => {
     try {
@@ -51,14 +59,7 @@ const StockaR = () => {
 
   // Close dropdown if clicked outside
   useEffect(() => {
-    const closeDropdown = (e) => {
-      fetchUserData();
-      if (!e.target.closest('#profile-icon') && !e.target.closest('#dropdown-content')) {
-        setDropdownVisible(false);
-      }
-    };
-    window.addEventListener('click', closeDropdown);
-    return () => window.removeEventListener('click', closeDropdown);
+    fetchUserData();
   }, []);
 
   // Handle search button click
@@ -99,26 +100,29 @@ const StockaR = () => {
   return (
     <div className='fordiv'>
       <nav>
-        <img id="logo" src={logo} alt="Logo" onClick={() => (window.location.href = '/')} />
+        <img id="logo" src={logo} alt="Logo" onClick={() => (window.location.href = '/profile')} />
         <h1 id="home-title">StockaR</h1>
         <div className="profile">
           <img
             id="profile-icon"
-            src="assets/profile-icon.jpg"
+            src={profileIcon}
             alt="Profile"
             onClick={toggleDropdown}
           />
           {dropdownVisible && (
-            <div id="dropdown-content" className="dropdown-content">
+            <div >
               <button>Your Profile</button>
-              <button>Logout</button>
+              <button className="btn btn-primary" onClick={handleLogout}>
+              Logout
+            </button>
             </div>
+
           )}
         </div>
         <div id="hamburger">&#9776;</div>
       </nav>
 
-      <main>
+      <main className='formain'>
         <div id="search-container">
           <input
             type="text"
@@ -194,24 +198,6 @@ const StockaR = () => {
           ))}
         </ul>
       </aside>
-      <div className="details">
-        {userDetails ? (
-          <>
-            <div style={{ display: "flex", justifyContent: "center" }}>
-            </div>
-            <h3 id="try">Welcome {userDetails.username} 🙏🙏</h3>
-            <div>
-              <p id="try">Email: {userDetails.email}</p>
-
-            </div>
-            <button className="btn btn-primary" onClick={handleLogout}>
-              Logout
-            </button>
-          </>
-        ) : (
-          <p><Newpage/></p>
-        )}
-      </div>
 
     </div>
   );
