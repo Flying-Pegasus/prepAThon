@@ -7,6 +7,7 @@ import Profile from './components/Userprofile';
 import {app} from "./pages/firebase"
 import { useEffect, useState } from 'react';
 import { getAuth } from 'firebase/auth';
+import StockaR from './components/home';
 
 const auth = getAuth(app);
 
@@ -23,7 +24,7 @@ function App() {
     <div>
       <Routes>
         <Route path="/" element={user ? <Navigate to="/profile" /> : <LoginPage />} />
-        <Route path="/profile" element={<Profile/>} />
+        <Route path="/profile" element={<StockaR/>} />
         <Route path="/new" element={<Newpage/>} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={user ? <Navigate to="/profile" /> : <LoginPage />} />
