@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import './StockaR.css';
+import './style.css';
 
 const StockaR = () => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
