@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import './style.css';
 import logo from "../pages/logo.png"
-import profileIcon from "../pages/profile-icon.png"
+
+import profileicon from "../pages/profile-icon.png"
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { app, db } from "../pages/firebase"
 import { doc, getDoc } from "firebase/firestore";
@@ -34,15 +34,14 @@ const StockaR = () => {
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
 
 
+
   const fetchUserData = async () => {
     try {
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        console.log("Hi");
         const docRef = doc(db, "Users", user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setUserDetails(docSnap.data());
-          console.log(docSnap.data());
         } else {
           console.log("User is not logged in");
         }
@@ -50,7 +49,7 @@ const StockaR = () => {
     } catch (error) {
       console.log(error.message);
     }
-  }
+  };
 
   async function handleLogout() {
     try {
@@ -78,7 +77,6 @@ const StockaR = () => {
     fetchUserData();
     fetchDataBack();
     const closeDropdownAndSidebar = (e) => {
-      fetchUserData();
       if (!e.target.closest('#profileicon') && dropdownVisible) {
         setDropdownVisible(false);
       }
@@ -90,6 +88,7 @@ const StockaR = () => {
     window.addEventListener('click', closeDropdownAndSidebar);
     return () => window.removeEventListener('click', closeDropdownAndSidebar);
   }, [dropdownVisible, sidebarVisible]);
+
 
   // Handle search button click
   const handleSearch = async (e) => {
@@ -122,6 +121,7 @@ const StockaR = () => {
     } catch (error) {
       console.error('Error:', error);
     }
+  
     // Simulate company data search after 2 seconds
     setTimeout(() => {
       stopLoadingBar();
@@ -156,8 +156,8 @@ const StockaR = () => {
         <h1 id="home-title">StockaR</h1>
         <div className="profile">
           <img
-            id="profile-icon"
-            src={profileIcon}
+            id="profileicon"
+            src={profileicon}
             alt="Profile"
             onClick={toggleDropdown}
           />
@@ -234,26 +234,8 @@ const StockaR = () => {
             </div>
           </div>
         )}
-
-        <div id="metrics-section" style={{ display: 'none' }}>
-          <h2>Company Metrics</h2>
-          <div className="metric-box">
-            <p>Companies in the same country: <span id="same-country-count"></span></p>
-          </div>
-          <div className="metric-box">
-            <p>Greater diversity companies: <span id="diversity-count"></span></p>
-          </div>
-          <div className="metric-box">
-            <p>Stock Price Change: <span id="stock-price-change"></span></p>
-          </div>
-          <div className="metric-box">
-            <p>Market Share Change: <span id="market-share-change"></span></p>
-          </div>
-          <div className="metric-box">
-            <p>Predicted Stock Price: <span id="predicted-stock-price"></span></p>
-          </div>
-        </div>
       </main>
+
 
       <aside id="sidebar" className={sidebarVisible ? 'open' : ''}>
         <h2>Search History</h2>
@@ -263,7 +245,6 @@ const StockaR = () => {
           ))}
         </ul>
       </aside>
-
     </div>
   );
 };

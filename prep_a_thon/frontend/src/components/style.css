@@ -36,13 +36,13 @@ nav {
     background-color: #000;
     color: #00ff00;
     padding: 10px;
-    position: fixed;
-    top: 0%;
-    right: 0%;
-    width: 100vw;
-    z-index: 1;
-
+    position: fixed; /* Fix the header to the top */
+    top: 0;          /* Ensure it sticks to the top */
+    left: 0;         /* Full width of the page */
+    right: 0;        /* Full width of the page */
+    z-index: 1000;   /* Ensure it stays above other elements */
 }
+
 
 nav img#logo {
     width: 50px;
@@ -60,19 +60,24 @@ h1 {
 }
 
 .profile {
-    position: relative;
-    margin-left: 30px;
+    position: relative;  /* Allows for positioning of child elements */
+    margin-left: 30px;  /* Space to the left of the profile container */
+    display: flex;       /* Enables flexbox for better alignment */
+    align-items: center; /* Centers items vertically within the profile container */
+    height: 50px;       /* Fixed height for the profile container */
 }
 
-#profile-icon {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid #00ff00;
-    padding: 2px;
-    margin: 5px;
+
+#profileicon {
+    width: 40px;        /* Width of the profile icon */
+    height: 40px;       /* Height of the profile icon */
+    border-radius: 50%; /* Makes the icon circular */
+    cursor: pointer;     /* Pointer cursor on hover */
+    border: 2px solid #00ff00; /* Green border for the icon */
+    padding: 2px;       /* Padding inside the icon */
+    object-fit: cover;  /* Ensures the image fits within the specified dimensions */
 }
+
 
 .dropdown-content {
     display: grid;
