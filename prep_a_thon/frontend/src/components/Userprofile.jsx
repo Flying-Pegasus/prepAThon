@@ -8,7 +8,7 @@ import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 
 const auth = getAuth(app);
 function Profile() {
-  const navigate = useNavigate();
+  const [data,setData] = useState({});
   const [userDetails, setUserDetails] = useState(null);
   const fetchUserData = async () => {
     try {
@@ -29,8 +29,19 @@ function Profile() {
 
   }
 
+  const fetchDataBack = async () =>{
+    try{
+      const response = await fetch('http://localhost:5000/members');
+      const jsonData = await response.json();
+      setData(jsonData)
+    }catch(error){
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     fetchUserData();
+    fetchDataBack();
   }, []);
 
   async function handleLogout() {
@@ -46,6 +57,7 @@ function Profile() {
     <div>
       {userDetails ? (
         <>
+        
           <div style={{ display: "flex", justifyContent: "center" }}>
           </div>
           <h3 id="try">Welcome {userDetails.username} 🙏🙏</h3>
