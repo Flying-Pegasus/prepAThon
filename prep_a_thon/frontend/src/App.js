@@ -5,19 +5,21 @@ import LoginPage from './pages/Login';
 import Newpage from './pages/Newpage';
 import Profile from './components/Userprofile';
 import {app} from "./pages/firebase"
-import { useEffect, useState } from 'react';
+import react, { useEffect, useState } from 'react';
 import { getAuth } from 'firebase/auth';
 import StockaR from './components/react';
 
 const auth = getAuth(app);
 
 function App() {
+  const [data,setData] = useState({});
   const [user, setUser] = useState();
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
       setUser(user);
     });
-  });
+  },[]);
+
 
   return (
 
