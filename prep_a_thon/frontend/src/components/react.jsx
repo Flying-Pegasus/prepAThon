@@ -6,14 +6,13 @@ import profileicon from "../pages/profile-icon.png"
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { app, db } from "../pages/firebase"
 import { doc, getDoc } from "firebase/firestore";
-import { useNavigate } from 'react-router-dom';
-import Newpage from '../pages/Newpage';
+import {Chart as ChartJS} from "chart.js/auto"
+import {Line} from "react-chartjs-2"
 
 
 const auth = getAuth(app);
 
 const StockaR = () => {
-  const navigate = useNavigate();
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [companyName, setCompanyName] = useState('');
   const [countryName, setCountryName] = useState('');
@@ -25,11 +24,6 @@ const StockaR = () => {
   const [userDetails, setUserDetails] = useState(null);
   const [data, setData] = useState({});
 
-  // const toggleDropdown = () => {
-  //   setDropdownVisible(!dropdownVisible);
-  //   console.log("clicked")
-  //   console.log(dropdownVisible)
-  // }
   const toggleDropdown = () => setDropdownVisible((prev) => !prev);
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
 
@@ -87,7 +81,7 @@ const StockaR = () => {
 
     window.addEventListener('click', closeDropdownAndSidebar);
     return () => window.removeEventListener('click', closeDropdownAndSidebar);
-  }, [dropdownVisible, sidebarVisible]);
+  }, [dropdownVisible, sidebarVisible,companyName]);
 
 
   // Handle search button click
@@ -127,8 +121,6 @@ const StockaR = () => {
       stopLoadingBar();
       setInfoVisible(true);
     }, 2000);
-
-
 
   };
 
@@ -215,22 +207,76 @@ const StockaR = () => {
               <p>companies with greater diversity are in the same country</p>
             </div>
             <div className="info-box">
-              <h3>Domestic Comparison Results:</h3>
-              <p>Greater Stock Price: {data.compare[0]}<br />Greater Market Share: {data.compare[1]}<br />Greater Revenue: {data.compare[2]}<br />Greater Expense: {data.compare[3]}</p>
+              <h2>Domestic Comparison Results:</h2>
+              <p><b>Greater Stock Price:</b> {data.compare[0]}<br /><b>Greater Market Share:</b> {data.compare[1]}<br /><b>Greater Revenue:</b> {data.compare[2]}<br /><b>Greater Expense:</b> {data.compare[3]}</p>
               <br />
-              <h3>Global Comparison Results:</h3>
-              <p>Greater Stock Price: {data.compare[4]}<br />Greater Market Share: {data.compare[5]}<br />Greater Revenue: {data.compare[6]}<br />Greater Expense: {data.compare[7]}</p>
+              <h2>Global Comparison Results:</h2>
+              <p><b>Greater Stock Price:</b> {data.compare[4]}<br /><b>Greater Market Share:</b> {data.compare[5]}<br /><b>Greater Revenue:</b> {data.compare[6]}<br /><b>Greater Expense:</b> {data.compare[7]}</p>
             </div>
             <div className="info-box">
-              <h3>Graphs</h3>
+              <h2>Graphs</h2>
+{/*               
+              <Line
+              data={{
+                labels: [null,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],
+                datasets: [{
+                  label: `Stock Price for ${data.company} (2015-2024) in $`,
+                  data: [null,data.plot.Revenue[0],data.plot.Revenue[1],data.plot.Revenue[2],data.plot.Revenue[3],data.plot.Revenue[4],data.plot.Revenue[5],data.plot.Revenue[6],data.plot.Revenue[7],data.plot.Revenue[8],data.plot.Revenue[9]],
+                  fill: false,
+                  borderColor: 'rgb(0,0,0)',
+                  tension: 0
+                }]
+              }}/>
+              <br/>
+              <br/>
+              <Line
+              data={{
+                labels: [null,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],
+                datasets: [{
+                  label: `Revenue of ${data.company} (2015-2024) in $`,
+                  data: [null,data.plot.Revenue[0],data.plot.Revenue[1],data.plot.Revenue[2],data.plot.Revenue[3],data.plot.Revenue[4],data.plot.Revenue[5],data.plot.Revenue[6],data.plot.Revenue[7],data.plot.Revenue[8],data.plot.Revenue[9]],
+                  fill: false,
+                  borderColor: 'rgb(0,0,0)',
+                  tension: 0,
+                  backgroundColor: 'rgba(100,0,0)',
+                }]
+              }}/>
+              <br/>
+              <br/>
+              <Line
+              data={{
+                labels: [null,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],
+                datasets: [{
+                  label: `Market Share for ${data.company} (2015-2024)`,
+                  data: [65, 59, 80, 81, 56, 55, 40],
+                  fill: false,
+                  borderColor: 'rgb(0,0,0)',
+                  tension: 0,
+                  backgroundColor: 'rgba(100,0,0)',
+                }]
+              }}/>
+              <br/>
+              <br/>
+              <Line
+              data={{
+                labels: [null,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],
+                datasets: [{
+                  label: `Expense for ${data.company} (2015-2024)`,
+                  data: [65, 59, 80, 81, 56, 55, 40],
+                  fill: false,
+                  borderColor: 'rgb(0,0,0)',
+                  tension: 0,
+                  backgroundColor: 'rgba(100,0,0)',
+                }]
+              }}/> */}
             </div>
             <div className="info-box">
-              <h3>Analysis & Comments</h3>
-              <p>Average Stock Price: {data.growth[0]}<br />Average Revenue: {data.growth[1]}<br />Average Market Share: {data.growth[2]}<br />Average Expense: {data.growth[3]}<br />Stock Price Growth:  {data.growth[4]}<br />Revenue Growth: {data.growth[5]}<br />Market Share Growth: {data.growth[6]}<br />Expense Growth: {data.growth[7]}<br />Comments:<br />{data.growth[8]}<br />{data.growth[9]}<br />{data.growth[10]}<br />{data.growth[11]}</p>
+              <h2>Analysis & Comments</h2><br/>
+              <p><b>Average Stock Price:</b> {data.growth[0]} B<br /><b>Average Revenue:</b> {data.growth[1]} M<br /><b>Average Market Share:</b> {data.growth[2]} %<br /><b>Average Expense:</b> {data.growth[3]} M<br /><b>Stock Price Growth:</b>  {data.growth[4]} %<br /><b>Revenue Growth:</b> {data.growth[5]} %<br /><b>Market Share Growth:</b> {data.growth[6]} %<br /><b>Expense Growth:</b> {data.growth[7]} %<br /><br /><b>Comments:</b><br />{data.growth[8]}<br />{data.growth[9]}<br />{data.growth[10]}<br />{data.growth[11]}</p>
             </div>
             <div className="info-box">
-              <h3>Prediction Analysis</h3>
-              <p>Predicted Stock Price (2025): {data.Trained[0]}<br />Predicted Revenue (2025): {data.Trained[1]}<br />Predicted Market Share (2025): {data.Trained[2]}<br />Predicted Expense (2025): {data.Trained[3]}</p>
+              <h2>Prediction Analysis</h2><br/>
+              <p><b>Predicted Stock Price (2025):</b> {data.Trained[0]} B<br /><b>Predicted Revenue (2025):</b> {data.Trained[1]} M<br /><b>Predicted Market Share (2025):</b> {data.Trained[2]} %<br /><b>Predicted Expense (2025):</b> {data.Trained[3]} M</p>
             </div>
           </div>
         )}

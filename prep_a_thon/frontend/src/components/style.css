@@ -177,7 +177,7 @@ h1 {
 
 /* Optional: Add hover effect to info boxes */
 .info-box:hover {
-    transform: scale(1.05); /* Slightly enlarge on hover */
+    transform: scale(1.02); /* Slightly enlarge on hover */
 }
 
 .metric-box {

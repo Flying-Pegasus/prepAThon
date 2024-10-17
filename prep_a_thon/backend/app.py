@@ -128,17 +128,17 @@ def plot_company_data():
         return
 
     years = list(range(2015, 2025))
-    metrics = {'Stock Price': [], 'Revenue': [], 'Market Share': [], 'Expense': []}
+    metrics = {'StockPrice': [], 'Revenue': [], 'MarketShare': [], 'Expense': []}
 
     for year in years:
-        stock_price_col = f'Stock Price ({year})'
+        stock_price_col = f'StockPrice ({year})'
         revenue_col = f'Revenue ({year})'
-        market_share_col = f'Market share ({year})'
+        market_share_col = f'MarketShare ({year})'
         expense_col = f'Expense ({year})'
 
         if revenue_col in company_data.columns:
             revenue = company_data[revenue_col].values[0]
-            metrics['Revenue'].append((year, pd.to_numeric(revenue.replace('$', '').replace('B', 'e9').replace('M', 'e6'), errors='coerce')))
+            metrics['Revenue'].append(pd.to_numeric(revenue.replace('$', '').replace('B', 'e9').replace('M', 'e6'), errors='coerce'))
 
         if stock_price_col in company_data.columns:
             stock_price = company_data[stock_price_col].values[0]
@@ -149,31 +149,33 @@ def plot_company_data():
                 elif 'B' in stock_price:
                     stock_price = float(stock_price.replace('B', '').strip()) * 1_000_000_000
             numeric_stock_price = pd.to_numeric(stock_price, errors='coerce')
-            metrics['Stock Price'].append((year, numeric_stock_price))
+            metrics['StockPrice'].append(numeric_stock_price)
 
         if market_share_col in company_data.columns:
             market_share = company_data[market_share_col].values[0]
-            metrics['Market Share'].append((year, pd.to_numeric(market_share, errors='coerce')))
+            metrics['MarketShare'].append(pd.to_numeric(market_share, errors='coerce'))
 
         if expense_col in company_data.columns:
             expense = company_data[expense_col].values[0]
-            metrics['Expense'].append((year, pd.to_numeric(expense.replace('$', '').replace('B', 'e9').replace('M', 'e6'), errors='coerce')))
+            metrics['Expense'].append(pd.to_numeric(expense.replace('$', '').replace('B', 'e9').replace('M', 'e6'), errors='coerce'))
 
-    for metric_name, values in metrics.items():
-        values = [(year, val) for year, val in values if not np.isnan(val)]
-        if not values:
-            continue
-        years, metric_values = zip(*values)
-        plt.figure(figsize=(10, 6))
-        plt.plot(years, metric_values, marker='o', linestyle='-', label=f'{metric_name} vs Year')
-        plt.title(f'{metric_name} for {company_name} (2015-2024)')
-        plt.xlabel('Year')
-        plt.ylabel(metric_name)
-        plt.xticks(years)
-        plt.grid(True)
-        plt.legend()
-        plt.tight_layout()
-        plt.show()
+
+    # for metric_name, values in metrics.items():
+    #     values = [(year, val) for year, val in values if not np.isnan(val)]
+    #     if not values:
+    #         continue
+    #     years, metric_values = zip(*values)
+    #     plt.figure(figsize=(10, 6))
+    #     plt.plot(years, metric_values, marker='o', linestyle='-', label=f'{metric_name} vs Year')
+    #     plt.title(f'{metric_name} for {company_name} (2015-2024)')
+    #     plt.xlabel('Year')
+    #     plt.ylabel(metric_name)
+    #     plt.xticks(years)
+    #     plt.grid(True)
+    #     plt.legend()
+    #     plt.tight_layout()
+    #     plt.show()
+    return metrics
 
 
 
@@ -308,7 +310,7 @@ def analyze_company_growth():
     }
 
     # Generate comments based on growth and stability
-    comments = [stock_prices.mean(),revenues.mean(),market_shares.mean(),expenses.mean(),stock_price_growth.mean(),revenue_growth.mean(),market_share_growth.mean(),expense_growth.mean()]  # Use a list to store comments
+    comments = [round((stock_prices.mean())/1000000000,2),round((revenues.mean())/1000000,2),round(market_shares.mean(),2),round((expenses.mean())/1000000,2),round(stock_price_growth.mean(),2),round(revenue_growth.mean(),2),round(market_share_growth.mean(),2),round(expense_growth.mean(),2)]  # Use a list to store comments
 
     # Statistical data summary
     stats_summary = {
@@ -445,17 +447,21 @@ def train_and_savemodel(company_name):
     # Predict the next year (2025)
     next_year = np.array([[historical_data['Revenue'].mean(), historical_data['Market Share'].mean(), historical_data['Expense'].mean()]])
 
-    predicted_stock_price = stock_model.predict(next_year)[0]
-    predicted_revenue = revenue_model.predict(next_year)[0]
+    predicted_stock_price = (stock_model.predict(next_year)[0])/1000000000
+    rounded_predicted_stock_price = round(predicted_stock_price, 2)
+    predicted_revenue = (revenue_model.predict(next_year)[0])/1000000
+    rounded_predicted_revenue = round(predicted_revenue, 2)
     predicted_market_share = market_share_model.predict(next_year)[0]
-    predicted_expense = expense_model.predict(next_year)[0]
+    rounded_predicted_market_share = round(predicted_market_share, 2)
+    predicted_expense = (expense_model.predict(next_year)[0])/1000000
+    rounded_predicted_expense = round(predicted_expense, 2)
 
     print("Predicted Stock Price (2025):", predicted_stock_price)
     print("Predicted Revenue (2025):", predicted_revenue)
     print("Predicted Market Share (2025):", predicted_market_share)
     print("Predicted Expense (2025):", predicted_expense)
 
-    return [predicted_stock_price,predicted_revenue,predicted_market_share,predicted_expense]
+    return [rounded_predicted_stock_price,rounded_predicted_revenue,rounded_predicted_market_share,rounded_predicted_expense]
 
 # Initialize global variables
 
@@ -491,9 +497,11 @@ def new_company():
     # diversity = 
     diversity = str(companies_with_higher_diversity())
     count_company = str(count_companies_in_country())
+    plotting = plot_company_data()
+    # print("The revenue is",plotting["Revenue"])
 
     compare_company = compare_company_2024()
-    datas = {"countries": countries.tolist(),"growth": comments,"Trained": message,"compare":compare_company,"diversity": diversity, "count_companies":count_company}
+    datas = {"countries": countries.tolist(),"growth": comments,"Trained": message,"compare":compare_company,"diversity": diversity, "count_companies":count_company, "company": company_name,"plot":plotting}
     return jsonify(datas)
 
 @app.route('/select_company', methods=['POST'])
